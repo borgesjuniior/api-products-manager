@@ -1,7 +1,5 @@
 package com.manager.controllers;
 
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,8 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.manager.dtos.SaleRequest;
-import com.manager.dtos.SalesResponse;
+import com.manager.dtos.SaleRequestDTO;
+import com.manager.dtos.SalesResponseDTO;
+import com.manager.entities.Product;
 import com.manager.entities.Sale;
 import com.manager.repositories.IProductRepository;
 import com.manager.repositories.ISaleRepository;
@@ -33,30 +32,18 @@ public class SalesController {
 
   @PostMapping
   @Transactional
-  public ResponseEntity<Sale> create(@RequestBody SaleRequest sale, UriComponentsBuilder uriBuider) {
-    UUID productId = UUID.fromString(sale.productId());
-    var product = productRepository.findById(productId);
-
-    if (!product.isPresent()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    Sale newSale = new Sale();
-
-    newSale.setProduct(product.get());
-    newSale.setQuantity(sale.quantity());
-    newSale.setTotal(sale.quantity() * product.get().getPrice());
-
-    var createdSale = saleRepository.save(newSale);
+  public ResponseEntity<SalesResponseDTO> create(@RequestBody SaleRequestDTO sale, UriComponentsBuilder uriBuider) {
+    Product product = productRepository.getReferenceById(sale.productId());
+    Sale createdSale = saleRepository.save(new Sale(sale, product));
 
     var uri = uriBuider.path("/sales/{id}").buildAndExpand(createdSale.getId()).toUri();
 
-    return ResponseEntity.created(uri).body(createdSale);
+    return ResponseEntity.created(uri).body(new SalesResponseDTO(createdSale));
   }
 
   @GetMapping
-  public Page<SalesResponse> list(Pageable pageable) {
-    return saleRepository.findAll(pageable).map(sale -> new SalesResponse(sale));
+  public Page<SalesResponseDTO> list(Pageable pageable) {
+    return saleRepository.findAll(pageable).map(sale -> new SalesResponseDTO(sale));
   }
 
 }

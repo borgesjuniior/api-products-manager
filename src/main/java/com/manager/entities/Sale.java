@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.manager.dtos.SaleRequestDTO;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -15,10 +17,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "sales")
 @Data
+@NoArgsConstructor
 public class Sale {
 
   @Id
@@ -36,4 +40,12 @@ public class Sale {
 
   @UpdateTimestamp
   private LocalDateTime updated_at;
+
+  public Sale(SaleRequestDTO sale, Product product) {
+    this.product = product;
+    this.quantity = sale.quantity();
+    this.total = sale.quantity() * product.getPrice();
+    this.created_at = LocalDateTime.now();
+    this.updated_at = LocalDateTime.now();
+  }
 }

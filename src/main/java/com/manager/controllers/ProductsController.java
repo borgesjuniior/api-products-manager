@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.manager.dtos.ProductRequestDTO;
+import com.manager.dtos.ProductResponseDTO;
 import com.manager.entities.Product;
 import com.manager.repositories.IProductRepository;
 
@@ -30,24 +32,26 @@ public class ProductsController {
 
   @PostMapping
   @Transactional
-  public ResponseEntity<Product> create(@RequestBody Product product, UriComponentsBuilder uriBuilder) {
-    var createdProduct = productRespository.save(product);
-    var uri = uriBuilder.path("/products/{id}").buildAndExpand(createdProduct.getId()).toUri();
+  public ResponseEntity<ProductResponseDTO> create(
+      @RequestBody ProductRequestDTO product,
+      UriComponentsBuilder uriBuilder) {
+    Product createdProduct = productRespository.save(new Product(product));
+    var uri = uriBuilder.path("/products/{id}").buildAndExpand(createdProduct).toUri();
 
-    return ResponseEntity.created(uri).body(product);
+    return ResponseEntity.created(uri).body(new ProductResponseDTO(createdProduct));
   }
 
   @GetMapping
-  public Page<Product> list(Pageable pageable) {
-    return productRespository.findAll(pageable);
+  public Page<ProductResponseDTO> list(Pageable pageable) {
+    return productRespository.findAll(pageable).map(product -> new ProductResponseDTO(product));
   }
 
-  @PutMapping("/{id}")
+  @PutMapping
   @Transactional
-  public ResponseEntity<Product> update(@PathVariable UUID id, @RequestBody Product product) {
-    var productFound = productRespository.findById(id).get();
+  public ResponseEntity<ProductResponseDTO> update(@RequestBody ProductRequestDTO product) {
+    var productFound = productRespository.getReferenceById(product.id());
     productFound.update(product);
-    return ResponseEntity.ok(productFound);
+    return ResponseEntity.ok(new ProductResponseDTO(productFound));
   }
 
   @DeleteMapping("/{id}")
