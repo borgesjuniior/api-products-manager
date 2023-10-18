@@ -7,35 +7,33 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "products")
+@Table(name = "sales")
 @Data
-public class Product {
+public class Sale {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-  private String name;
-  private String description;
-  private Double price;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "product_id", nullable = false)
+  private Product product;
   private Integer quantity;
+  private Double price;
 
   @CreationTimestamp
   private LocalDateTime created_at;
 
   @UpdateTimestamp
   private LocalDateTime updated_at;
-
-  public void update(Product product) {
-    this.name = product.getName();
-    this.description = product.getDescription();
-    this.price = product.getPrice();
-    this.updated_at = product.getUpdated_at();
-  }
 }

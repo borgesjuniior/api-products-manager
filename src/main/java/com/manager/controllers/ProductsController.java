@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.manager.entities.Product;
-import com.manager.repositories.IProductRespository;
+import com.manager.repositories.IProductRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -26,9 +26,10 @@ import jakarta.transaction.Transactional;
 public class ProductsController {
 
   @Autowired
-  private IProductRespository productRespository;
+  private IProductRepository productRespository;
 
   @PostMapping
+  @Transactional
   public ResponseEntity<Product> create(@RequestBody Product product, UriComponentsBuilder uriBuilder) {
     var createdProduct = productRespository.save(product);
     var uri = uriBuilder.path("/products/{id}").buildAndExpand(createdProduct.getId()).toUri();
