@@ -1,10 +1,13 @@
 package com.manager.controllers;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.manager.dtos.SaleRequest;
-import com.manager.entities.Product;
+import com.manager.dtos.SalesResponse;
 import com.manager.entities.Sale;
 import com.manager.repositories.IProductRepository;
 import com.manager.repositories.ISaleRepository;
@@ -43,7 +46,6 @@ public class SalesController {
 
     newSale.setProduct(product.get());
     newSale.setQuantity(sale.quantity());
-    newSale.setPrice(sale.price());
 
     var createdSale = saleRepository.save(newSale);
 
@@ -51,4 +53,10 @@ public class SalesController {
 
     return ResponseEntity.created(uri).body(createdSale);
   }
+
+  @GetMapping
+  public Page<SalesResponse> list(Pageable pageable) {
+    return saleRepository.findAll(pageable).map(sale -> new SalesResponse(sale));
+  }
+
 }

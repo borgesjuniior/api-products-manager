@@ -29,7 +29,6 @@ public class Sale {
   @JoinColumn(name = "product_id", nullable = false)
   private Product product;
   private Integer quantity;
-  private Double price;
 
   @CreationTimestamp
   private LocalDateTime created_at;
